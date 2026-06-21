@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Condurre un Laser · ILCA</title>
+<meta name="description" content="Manuale interattivo per imparare a condurre una deriva Laser / ILCA: andature, manovre, vento forte e recupero da scuffia.">
+<!-- PWA -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0C2233">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Laser ILCA">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --ink:#0C2233; --ink-soft:#41566A; --sea:#15607E; --sea-deep:#0C3A50;
+  --paper:#EAF0ED; --panel:#FBFDFC; --line:#C7D4CE; --line-soft:#DDE6E1;
+  --signal:#E8531C; --signal-deep:#BE3E0F; --warn:#B23628; --sun:#E5A40A;
+  --shadow:0 1px 0 rgba(12,34,51,.04), 0 8px 28px -16px rgba(12,34,51,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); background:var(--paper);
+  font-family:'Inter',system-ui,sans-serif; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    linear-gradient(rgba(21,96,126,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(21,96,126,.035) 1px,transparent 1px);
+  background-size:34px 34px;
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+
+/* ---------- top bar ---------- */
+header{position:sticky;top:0;z-index:40;background:rgba(234,240,237,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{max-width:760px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:12px}
+.logo{width:30px;height:30px;flex:0 0 auto}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;font-size:15px;line-height:1.1}
+.brand small{display:block;font-family:'Space Mono',monospace;font-weight:400;font-size:9.5px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--sea);margin-top:2px}
+nav.chips{max-width:760px;margin:0 auto;padding:0 12px 9px;display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+nav.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;
+  text-decoration:none;color:var(--sea-deep);background:var(--panel);border:1px solid var(--line);
+  padding:6px 11px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:.18s}
+.chip:hover{border-color:var(--sea)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+main{max-width:760px;margin:0 auto;padding:0 18px 90px}
+
+/* ---------- hero ---------- */
+.hero{padding:30px 0 8px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--signal);margin:0 0 12px}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(30px,8.5vw,46px);
+  line-height:1.02;letter-spacing:-.025em;margin:0 0 14px}
+h1 em{font-style:normal;color:var(--sea)}
+.lede{font-size:16px;color:var(--ink-soft);max-width:52ch;margin:0 0 8px}
+
+/* ---------- rose ---------- */
+.rose-wrap{margin:18px 0 6px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:16px 14px 18px;box-shadow:var(--shadow)}
+.rose-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.rose-head h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin:0;letter-spacing:-.01em}
+.rose-hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--ink-soft);letter-spacing:.02em}
+#rose{display:block;width:100%;max-width:330px;margin:2px auto 0;touch-action:none;cursor:grab}
+#rose:active{cursor:grabbing}
+.rose-noGo{fill:rgba(178,54,40,.10)}
+.rose-ring{fill:none;stroke:var(--line);stroke-width:1}
+.rose-tick{stroke:var(--line-soft);stroke-width:1}
+.sectorLbl{font-family:'Space Mono',monospace;font-size:10px;fill:var(--ink-soft);letter-spacing:.04em}
+.windLbl{font-family:'Space Mono',monospace;font-size:11px;fill:var(--signal-deep);font-weight:700;letter-spacing:.1em}
+.courseLine{stroke:var(--sea);stroke-width:2;stroke-dasharray:3 4;opacity:.55}
+.knob{fill:var(--sea);stroke:#fff;stroke-width:2}
+.hull{fill:var(--ink)}
+.sailF{fill:rgba(21,96,126,.85)}
+.sailLuff{fill:none;stroke:var(--warn);stroke-width:2.5;stroke-dasharray:2 4}
+.boomL{stroke:#0C2233;stroke-width:2.4;stroke-linecap:round}
+
+/* readout */
+.readout{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin-top:14px;
+  border-top:1px solid var(--line-soft);padding-top:13px}
+.readout .big{grid-column:1/-1;display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:4px}
+.r-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:21px;letter-spacing:-.01em}
+.r-name.danger{color:var(--warn)}
+.r-deg{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;color:var(--signal)}
+.r-mura{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:#fff;
+  background:var(--sea);padding:3px 8px;border-radius:5px}
+.r-tip{grid-column:1/-1;font-size:14.5px;color:var(--ink-soft);margin:2px 0 0}
+.quick{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;align-items:center}
+.qbtn{font-family:'Space Mono',monospace;font-size:11px;border:1px solid var(--line);background:var(--paper);
+  color:var(--sea-deep);padding:6px 10px;border-radius:18px;cursor:pointer;transition:.15s}
+.qbtn:hover{border-color:var(--sea)}
+.qbtn.tack{margin-left:auto;background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ---------- sections ---------- */
+section{padding:34px 0;border-bottom:1px solid var(--line);scroll-margin-top:96px}
+.sec-eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--sea);margin:0 0 9px;display:flex;align-items:center;gap:9px}
+.sec-eyebrow b{color:var(--signal);font-weight:700}
+h2.sec{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(23px,5.5vw,30px);
+  letter-spacing:-.02em;margin:0 0 16px;line-height:1.08}
+p{margin:0 0 14px}
+p.intro{font-size:15.5px}
+strong{font-weight:600;color:var(--ink)}
+.term{font-family:'Space Mono',monospace;font-size:.92em;color:var(--sea-deep);background:rgba(21,96,126,.08);
+  padding:1px 5px;border-radius:4px;white-space:nowrap}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px 17px 4px;
+  margin:0 0 16px;box-shadow:var(--shadow)}
+.card h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin:0 0 9px;letter-spacing:-.01em}
+
+/* numbered steps */
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:4px 0 16px}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 16px 46px;margin:0}
+ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:0;top:-1px;
+  font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#fff;background:var(--sea);
+  width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+ol.steps li b{display:block;font-family:'Space Grotesk',sans-serif;font-size:14.5px;margin-bottom:2px}
+ol.steps li span{font-size:14px;color:var(--ink-soft)}
+ol.steps.warnsteps li::before{background:var(--warn)}
+
+ul.clean{list-style:none;padding:0;margin:4px 0 14px}
+ul.clean li{position:relative;padding:0 0 11px 22px;font-size:14.5px;color:var(--ink-soft)}
+ul.clean li::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:7px;
+  background:var(--signal);border-radius:2px;transform:rotate(45deg)}
+ul.clean li b{color:var(--ink);font-weight:600}
+
+/* anatomy svg */
+.anatomy{display:block;width:100%;max-width:480px;margin:6px auto 14px}
+.an-line{stroke:var(--line);stroke-width:1}
+.an-lab{font-family:'Space Mono',monospace;font-size:10.5px;fill:var(--sea-deep)}
+.an-num{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;fill:#fff}
+
+/* rig table */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px;margin:4px 0 12px;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{padding:9px 11px;text-align:left;border-bottom:1px solid var(--line-soft)}
+.tbl th{font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--sea);background:rgba(21,96,126,.05);font-weight:700}
+.tbl td:first-child{font-family:'Space Grotesk',sans-serif;font-weight:700}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .deg{font-family:'Space Mono',monospace;color:var(--signal-deep)}
+
+/* gust diagram */
+.gust{display:block;width:100%;max-width:430px;margin:4px auto 16px}
+
+/* callout */
+.note{border-left:3px solid var(--signal);background:rgba(232,83,28,.06);padding:12px 14px;
+  border-radius:0 8px 8px 0;margin:0 0 16px;font-size:14px}
+.note.warn{border-color:var(--warn);background:rgba(178,54,40,.07)}
+.note.sea{border-color:var(--sea);background:rgba(21,96,126,.06)}
+.note b{font-family:'Space Grotesk',sans-serif}
+
+/* glossary */
+.gloss{columns:2;column-gap:18px}
+@media(max-width:520px){.gloss{columns:1}}
+.gloss dl{break-inside:avoid;margin:0 0 11px}
+.gloss dt{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px}
+.gloss dt span{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--signal);font-weight:400;margin-left:6px}
+.gloss dd{margin:1px 0 0;font-size:13px;color:var(--ink-soft)}
+
+/* sources */
+.src{font-size:13px;color:var(--ink-soft)}
+.src li{margin-bottom:9px}
+footer{padding:26px 0 0;font-size:11.5px;color:var(--ink-soft);font-family:'Space Mono',monospace;line-height:1.7}
+a{color:var(--sea-deep)}
+:focus-visible{outline:2.5px solid var(--signal);outline-offset:2px;border-radius:4px}
+[hidden]{display:none!important}
+
+/* ---------- pulsante installa ---------- */
+.install-row{margin:16px 0 2px}
+.install-btn{display:inline-flex;align-items:center;gap:9px;font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:14.5px;color:#fff;background:var(--ink);border:none;border-radius:12px;
+  padding:12px 18px;cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+.install-btn:hover{background:var(--sea-deep)}
+.install-btn .ic{color:var(--signal);font-size:18px;line-height:1}
+
+/* ---------- finestre modali (disclaimer + iOS) ---------- */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(12,34,51,.58);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:450px;width:100%;
+  padding:24px 22px 22px;box-shadow:0 24px 70px -22px rgba(12,34,51,.7);max-height:88vh;overflow:auto}
+.sheet .eyebrow{margin-bottom:10px}
+.sheet h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.02em;margin:0 0 12px}
+.sheet p{font-size:14.5px;color:var(--ink-soft);margin:0 0 12px}
+.sheet p strong{color:var(--ink)}
+.sheet .accept{width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#fff;
+  background:var(--signal);border:none;border-radius:12px;padding:14px;cursor:pointer;margin-top:4px;transition:.15s}
+.sheet .accept:hover{background:var(--signal-deep)}
+.sheet .ghost{display:block;width:100%;text-align:center;background:none;border:none;cursor:pointer;
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);margin-top:12px;text-decoration:underline}
+.ios-steps{list-style:none;padding:0;margin:0 0 6px}
+.ios-steps li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;font-size:14.5px;color:var(--ink)}
+.ios-steps li svg{flex:0 0 auto;margin-top:1px}
+</style>
+</head>
+<body>
+
+<!-- DISCLAIMER INIZIALE -->
+<div class="modal" id="disc" role="dialog" aria-modal="true" aria-labelledby="discTitle">
+  <div class="sheet">
+    <p class="eyebrow">Prima di iniziare</p>
+    <h2 id="discTitle">Un avviso importante</h2>
+    <p>Questa app è uno strumento <strong>solo didattico</strong>: è una sintesi a scopo formativo, non un corso e non un sostituto dell'esperienza in acqua.</p>
+    <p>La vela si impara con un <strong>istruttore o una scuola riconosciuta</strong> (in Italia la <strong>FIV</strong>). Indossa sempre l'aiuto al galleggiamento, controlla il meteo e le condizioni, e <strong>non uscire mai oltre il tuo livello e le tue forze</strong>.</p>
+    <p>Usando l'app accetti che l'autore non è responsabile di scelte fatte in mare. In caso di dubbio, resta a terra.</p>
+    <button class="accept" id="discAccept">Ho capito e accetto</button>
+  </div>
+</div>
+
+<!-- ISTRUZIONI INSTALLAZIONE iOS -->
+<div class="modal" id="iosSheet" role="dialog" aria-modal="true" aria-labelledby="iosTitle">
+  <div class="sheet">
+    <p class="eyebrow">Installa su iPhone / iPad</p>
+    <h2 id="iosTitle">Aggiungi alla schermata Home</h2>
+    <p>Su iOS l'installazione si fa a mano da <strong>Safari</strong>, in due passaggi:</p>
+    <ul class="ios-steps">
+      <li>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15607E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+        <span>Tocca <strong>Condividi</strong> (la freccia verso l'alto) nella barra di Safari.</span>
+      </li>
+      <li>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8531C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+        <span>Scegli <strong>Aggiungi alla schermata Home</strong>, poi conferma.</span>
+      </li>
+    </ul>
+    <button class="accept" id="iosClose">Ho capito</button>
+    <button class="ghost" id="iosDone">L'ho già installata — nascondi il pulsante</button>
+  </div>
+</div>
+
+<header>
+  <div class="bar">
+    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="19" fill="none" stroke="#15607E" stroke-width="1.5"/>
+      <path d="M20 6 L26 30 L14 30 Z" fill="#0C2233"/>
+      <path d="M20 9 L20 28" stroke="#E8531C" stroke-width="2"/>
+    </svg>
+    <div class="brand">Condurre un Laser<small>Manuale interattivo · ILCA</small></div>
+  </div>
+  <nav class="chips" id="nav">
+    <a class="chip" href="#andature">Andature</a>
+    <a class="chip" href="#barca">La barca</a>
+    <a class="chip" href="#conduzione">Conduzione</a>
+    <a class="chip" href="#manovre">Virata & strambata</a>
+    <a class="chip" href="#raffiche">Vento forte</a>
+    <a class="chip" href="#scuffia">Scuffia</a>
+    <a class="chip" href="#glossario">Glossario</a>
+    <a class="chip" href="#fonti">Fonti</a>
+  </nav>
+</header>
+
+<main>
+
+  <div class="hero">
+    <p class="eyebrow">Deriva monotipo · classe olimpica</p>
+    <h1>Leggere il vento,<br>regolare la <em>vela</em>,<br>tenere la barca piatta.</h1>
+    <p class="lede">Il Laser (oggi ILCA) ha un solo timoniere e una sola vela: tutto dipende da quanto sei in sintonia con il vento. Parti dalla rosa delle andature qui sotto — trascina per cambiare rotta e guarda come deve cambiare la vela.</p>
+
+    <div class="install-row"><button class="install-btn" id="installBtn" hidden><span class="ic">⤓</span> Installa l'app</button></div>
+
+    <!-- ROSA DELLE ANDATURE -->
+    <div class="rose-wrap">
+      <div class="rose-head">
+        <h2>Rosa delle andature</h2>
+        <span class="rose-hint">trascina la barca ↻</span>
+      </div>
+      <svg id="rose" viewBox="0 0 330 330" role="img" aria-label="Diagramma interattivo delle andature">
+        <!-- no-go zone -->
+        <path class="rose-noGo" id="noGoPath"/>
+        <!-- ring -->
+        <circle class="rose-ring" cx="165" cy="165" r="128"/>
+        <circle class="rose-ring" cx="165" cy="165" r="92" opacity=".5"/>
+        <!-- ticks every 30 -->
+        <g id="ticks"></g>
+        <!-- wind arrow from top -->
+        <g>
+          <line x1="165" y1="14" x2="165" y2="56" stroke="#E8531C" stroke-width="3"/>
+          <path d="M165 62 L159 50 L171 50 Z" fill="#E8531C"/>
+          <text class="windLbl" x="165" y="10" text-anchor="middle">VENTO</text>
+        </g>
+        <!-- sector labels -->
+        <g id="sectorLbls"></g>
+        <!-- course line + knob -->
+        <line id="course" class="courseLine" x1="165" y1="165" x2="165" y2="293"/>
+        <!-- boat group (rotates with heading) -->
+        <g id="boat">
+          <!-- hull: bow up -->
+          <path class="hull" d="M165 139 C171 150 172 178 168 192 L162 192 C158 178 159 150 165 139 Z"/>
+          <!-- boom + sail group (rotates around mast) -->
+          <g id="rigGroup">
+            <line class="boomL" id="boom" x1="165" y1="150" x2="165" y2="188"/>
+            <path class="sailF" id="sail" d="M165 150 C160 165 160 180 165 188 L165 150 Z"/>
+          </g>
+          <circle cx="165" cy="150" r="2.6" fill="#E8531C"/>
+        </g>
+        <circle class="knob" id="knob" cx="165" cy="293" r="9"/>
+      </svg>
+
+      <div class="readout">
+        <div class="big">
+          <span class="r-name" id="rName">Bolina stretta</span>
+          <span class="r-deg" id="rDeg">45°</span>
+          <span class="r-mura" id="rMura">mura a dritta</span>
+        </div>
+        <p class="r-tip" id="rTip"></p>
+      </div>
+
+      <div class="quick">
+        <button class="qbtn" data-ang="45">Bolina</button>
+        <button class="qbtn" data-ang="90">Traverso</button>
+        <button class="qbtn" data-ang="135">Lasco</button>
+        <button class="qbtn" data-ang="178">Poppa</button>
+        <button class="qbtn tack" id="tackBtn">⇄ Cambia mura</button>
+      </div>
+    </div>
+    <p class="rose-hint" style="text-align:center;margin-top:8px">Il vento arriva sempre dall'alto. La barca non può navigare nel settore rosso (l'angolo morto).</p>
+  </div>
+
+  <!-- ANDATURE -->
+  <section id="andature">
+    <p class="sec-eyebrow"><b>01</b> Orientarsi rispetto al vento</p>
+    <h2 class="sec">Le andature</h2>
+    <p class="intro">L'andatura è la direzione della barca rispetto al vento reale. Cambiando rotta cambia l'angolo con cui il vento colpisce le vele, quindi ogni andatura ha la sua regolazione. Una barca a vela <strong>non può navigare controvento</strong>: dentro un settore di circa 45° per lato (l'<span class="term">angolo morto</span> o settore di bordeggio) le vele fileggiano — sbattono senza spingere — e la barca si ferma.</p>
+
+    <table class="tbl">
+      <tr><th>Andatura</th><th>Angolo dal vento</th><th>Gruppo</th></tr>
+      <tr><td>Bolina stretta</td><td class="deg">37–45°</td><td>Controvento</td></tr>
+      <tr><td>Bolina larga</td><td class="deg">45–60°</td><td>Controvento</td></tr>
+      <tr><td>Traverso</td><td class="deg">~90°</td><td>Di lato</td></tr>
+      <tr><td>Lasco</td><td class="deg">~120°</td><td>Portante</td></tr>
+      <tr><td>Gran lasco</td><td class="deg">~150°</td><td>Portante</td></tr>
+      <tr><td>Poppa / fil di ruota</td><td class="deg">180°</td><td>Portante</td></tr>
+    </table>
+
+    <ul class="clean">
+      <li><b>Orzare</b> = avvicinare la prua al vento; <b>poggiare</b> = allontanarla. Quando orzi devi <b>cazzare</b> (tirare) le vele; quando poggi devi <b>lascare</b> (filare).</li>
+      <li><b>Sopravvento</b> è il lato da cui arriva il vento, <b>sottovento</b> quello opposto. Navighi con le <b>mura a dritta</b> se il vento entra da destra, con le <b>mura a sinistra</b> se entra da sinistra: conta per le precedenze e per la scelta delle manovre.</li>
+      <li>Più poggi verso la poppa, più la vela va lascata. In <b>poppa</b> sei nell'andatura più instabile: un piccolo errore di timone può far passare il vento dall'altro lato e provocare una strambata involontaria.</li>
+    </ul>
+  </section>
+
+  <!-- LA BARCA -->
+  <section id="barca">
+    <p class="sec-eyebrow"><b>02</b> Conoscere lo strumento</p>
+    <h2 class="sec">La barca e i suoi controlli</h2>
+    <p class="intro">Il Laser è una deriva monotipo disegnata da Bruce Kirby nel 1969: scafo lungo <strong>4,23 m</strong>, baglio <strong>1,42 m</strong>, peso a vuoto circa <strong>57 kg</strong>. La forza che ti raddrizza non viene da una chiglia ma dalla <strong>deriva mobile</strong> e dal tuo peso disteso fuori bordo. Per controllare la vela hai solo quattro cime.</p>
+
+    <svg class="anatomy" viewBox="0 0 480 300" role="img" aria-label="Schema del Laser">
+      <!-- water -->
+      <line class="an-line" x1="20" y1="240" x2="460" y2="240" stroke="#15607E" stroke-width="1.5"/>
+      <!-- hull -->
+      <path d="M120 240 C150 252 330 252 372 240 C360 232 132 232 120 240 Z" fill="#0C2233"/>
+      <!-- daggerboard -->
+      <rect x="232" y="240" width="9" height="46" fill="#15607E"/>
+      <!-- rudder -->
+      <rect x="356" y="240" width="7" height="34" fill="#15607E"/>
+      <line x1="360" y1="240" x2="392" y2="226" stroke="#0C2233" stroke-width="3"/>
+      <!-- mast -->
+      <line x1="200" y1="232" x2="200" y2="58" stroke="#0C2233" stroke-width="3.5"/>
+      <!-- sail -->
+      <path d="M200 62 C232 110 244 168 240 214 L200 214 Z" fill="rgba(21,96,126,.85)"/>
+      <!-- boom -->
+      <line x1="200" y1="214" x2="246" y2="214" stroke="#0C2233" stroke-width="3"/>
+      <!-- mainsheet -->
+      <path d="M246 214 C250 228 250 232 246 238" fill="none" stroke="#E8531C" stroke-width="2"/>
+      <!-- vang -->
+      <line x1="214" y1="214" x2="204" y2="230" stroke="#E5A40A" stroke-width="2"/>
+
+      <!-- callouts -->
+      <g class="an-lab" text-anchor="start">
+        <circle cx="200" cy="80" r="8.5" fill="#15607E"/><text class="an-num" x="200" y="84" text-anchor="middle">1</text>
+        <text x="214" y="84">Albero & randa (la vela)</text>
+        <circle cx="246" cy="214" r="8.5" fill="#15607E"/><text class="an-num" x="246" y="218" text-anchor="middle">2</text>
+        <text x="258" y="218">Boma</text>
+        <circle cx="248" cy="232" r="8.5" fill="#E8531C"/><text class="an-num" x="248" y="236" text-anchor="middle">3</text>
+        <text x="260" y="236">Scotta della randa</text>
+        <circle cx="236" cy="270" r="8.5" fill="#15607E"/><text class="an-num" x="236" y="274" text-anchor="middle">4</text>
+        <text x="248" y="274">Deriva</text>
+        <circle cx="388" cy="226" r="8.5" fill="#15607E"/><text class="an-num" x="388" y="230" text-anchor="middle">5</text>
+        <text x="248" y="292">Timone + barra (n.5, a poppa)</text>
+      </g>
+    </svg>
+
+    <div class="card">
+      <h3>Le quattro cime di controllo</h3>
+      <ul class="clean">
+        <li><b>Scotta della randa</b> <span class="term">mainsheet</span> — regola quanto la vela è aperta o chiusa. È il comando che usi di continuo.</li>
+        <li><b>Vang</b> <span class="term">kicker</span> — tira il boma verso il basso e controlla lo svergolamento (la torsione) della parte alta della vela.</li>
+        <li><b>Cunningham</b> — tende l'inferitura (il bordo d'entrata) e sposta in avanti il grasso della vela: serve soprattutto con vento forte.</li>
+        <li><b>Tesabase</b> <span class="term">outhaul</span> — regola la profondità del fondo della vela tirando la base lungo il boma.</li>
+      </ul>
+    </div>
+
+    <p>Lo stesso scafo accetta tre armi, così la barca si adatta al peso del velista e al vento. Cambiano solo la <strong>sezione inferiore dell'albero</strong> e la <strong>vela</strong>; boma e sezione superiore restano gli stessi.</p>
+    <table class="tbl">
+      <tr><th>Armo</th><th>Vela</th><th>Peso indicativo</th></tr>
+      <tr><td>ILCA 4 (4.7)</td><td class="deg">~4,7 m²</td><td>45–60 kg · giovani e leggeri</td></tr>
+      <tr><td>ILCA 6 (Radial)</td><td class="deg">~5,8 m²</td><td>60–75 kg</td></tr>
+      <tr><td>ILCA 7 (Standard)</td><td class="deg">~7 m²</td><td>75–90+ kg</td></tr>
+    </table>
+    <p class="src">Un armo più piccolo perdona di più gli errori ed è più gestibile con vento forte: ottimo per imparare.</p>
+  </section>
+
+  <!-- CONDUZIONE -->
+  <section id="conduzione">
+    <p class="sec-eyebrow"><b>03</b> Il principio di base</p>
+    <h2 class="sec">Tenere la barca bilanciata</h2>
+    <p class="intro">Il segreto, soprattutto di bolina, è il <strong>bilanciamento</strong>: più la barca resta piatta e in equilibrio, più va veloce. Ogni cambio di vento e ogni onda rompono quell'equilibrio, quindi il tuo lavoro è correggere in continuazione. Hai tre strumenti per farlo.</p>
+
+    <div class="card">
+      <h3>I tre strumenti dell'equilibrio</h3>
+      <ul class="clean">
+        <li><b>La regolazione della vela.</b> Con la vela tarata bene la barca è già quasi in equilibrio da sola. Cazza orzando, lasca poggiando, e controlla i filetti / il bordo d'entrata per capire se la vela "tira".</li>
+        <li><b>Il timone.</b> Usalo per assecondare il vento e le onde: a un piccolo salto di vento rispondi con la barra per mantenere costante la pressione in vela. Ma il timone storto è un freno — meno lo usi, meglio è.</li>
+        <li><b>Il tuo peso.</b> Distenditi fuori bordo (<span class="term">hiking</span>) per contrastare lo sbandamento. Quando la prua sale su un'onda spostati in avanti; quando affonda, indietro.</li>
+      </ul>
+    </div>
+
+    <p>Regola d'oro della bolina: <strong>barca piatta</strong>. Se sbanda troppo, prima distenditi fuori bordo, poi lasca un filo di scotta. Una barca che sbanda perde velocità, scarroccia di più e — come vedrai nella sezione sul vento forte — perde anche timone.</p>
+  </section>
+
+  <!-- MANOVRE -->
+  <section id="manovre">
+    <p class="sec-eyebrow"><b>04</b> Cambiare mura</p>
+    <h2 class="sec">Virata e strambata</h2>
+    <p class="intro">Per cambiare il lato da cui ricevi il vento ci sono due manovre. La <strong>virata</strong> fa passare la <strong>prua</strong> nel letto del vento (da bolina a bolina): è la più sicura. La <strong>strambata</strong> (o abbattuta) fa passare la <strong>poppa</strong> attraverso il vento (tra andature portanti): la barca resta sbilanciata più a lungo, quindi è più delicata.</p>
+
+    <div class="card">
+      <h3>Virata — passare la prua nel vento</h3>
+      <ol class="steps">
+        <li><b>Prepara</b><span>Scegli un momento in cui il vento è regolare, non in piena raffica. Parti da una buona velocità di bolina.</span></li>
+        <li><b>Orza</b><span>Spingi la barra (la cima del timone) lontano da te, dolcemente: la prua sale verso il vento.</span></li>
+        <li><b>Attraversa</b><span>Mentre la prua passa nel letto del vento, spostati con decisione sull'altro lato, restando basso sotto il boma e tenendo barra e scotta nelle stesse mani.</span></li>
+        <li><b>Riprendi rotta</b><span>Riporta la barra al centro sulle nuove mura, regola la scotta e riparti di bolina. Cerca di perdere meno velocità possibile.</span></li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3>Strambata — passare la poppa nel vento</h3>
+      <ol class="steps">
+        <li><b>Verifica lo spazio</b><span>Prima di iniziare assicurati di avere acqua libera sottovento. Mettiti col vento esattamente in poppa.</span></li>
+        <li><b>Lasca</b><span>Fila la scotta finché il boma è quasi a 90° rispetto alla barca, poggiando lentamente con la barra.</span></li>
+        <li><b>Accompagna il boma</b><span>Quando la balumina (il bordo d'uscita) comincia ad arricciarsi, aiuta la randa a passare dall'altro lato: dà uno strappetto alla scotta e controlla il boma — non lasciarlo sbattere libero.</span></li>
+        <li><b>Stabilizza</b><span>Appena il boma è passato, raddrizza la barra al centro e lasca subito la scotta sul nuovo bordo, tenendo la barca piatta. Tutto fluido, senza pause.</span></li>
+      </ol>
+    </div>
+    <div class="note warn"><b>Attenzione al boma.</b> Nella strambata il boma attraversa la barca con forza: tieni la testa bassa e, con vento forte, controllane il passaggio per non danneggiare l'attrezzatura o farti male. In poppa una poggiata involontaria può scatenare una strambata non voluta.</div>
+    <div class="note sea"><b>Tecnica avanzata, vento forte.</b> Nel Laser, in strambata con tanto vento, non si gira con il solo timone: si "guida" la barca rollandola con il peso, entrando veloci nella manovra (per esempio surfando un'onda o uscendo da una raffica), così senti meno il vento durante il passaggio.</div>
+  </section>
+
+  <!-- VENTO FORTE / RAFFICHE -->
+  <section id="raffiche">
+    <p class="sec-eyebrow"><b>05</b> La lezione dello schema: «sheet out»</p>
+    <h2 class="sec">Raffiche, sbandamento ed efficacia del timone</h2>
+    <p class="intro">Quando arriva una raffica la barca sbanda e tende a <strong>orzare da sola</strong> (la "straorzata", in inglese <em>round-up</em>). Capire perché succede ti dice esattamente cosa fare: <strong>lascare la scotta</strong>.</p>
+
+    <svg class="gust" viewBox="0 0 420 200" role="img" aria-label="Lo sbandamento riduce il timone in acqua">
+      <line x1="20" y1="150" x2="400" y2="150" stroke="#15607E" stroke-width="1.5"/>
+      <!-- upright boat -->
+      <g transform="translate(110,150)">
+        <path d="M-34 0 C-20 8 20 8 34 0 C24 -4 -24 -4 -34 0 Z" fill="#0C2233"/>
+        <rect x="-2" y="0" width="5" height="34" fill="#15607E"/>
+        <text x="0" y="-54" text-anchor="middle" class="an-lab">Barca piatta</text>
+        <text x="0" y="58" text-anchor="middle" class="an-lab" fill="#15607E">timone tutto in acqua ✓</text>
+        <line x1="0" y1="0" x2="0" y2="-46" stroke="#0C2233" stroke-width="3"/>
+      </g>
+      <!-- heeled boat -->
+      <g transform="translate(300,150) rotate(30)">
+        <path d="M-34 0 C-20 8 20 8 34 0 C24 -4 -24 -4 -34 0 Z" fill="#0C2233"/>
+        <rect x="-2" y="0" width="5" height="34" fill="#B23628"/>
+        <line x1="0" y1="0" x2="0" y2="-46" stroke="#0C2233" stroke-width="3"/>
+      </g>
+      <text x="300" y="92" text-anchor="middle" class="an-lab" fill="#B23628">sbandata: ~⅓ di timone fuori</text>
+      <text x="300" y="40" text-anchor="middle" class="an-lab">Barca sbandata 30°</text>
+    </svg>
+
+    <p>Lo <strong>sbandamento solleva il timone fuori dall'acqua</strong>: meno pala immersa significa meno presa. A circa 30° di sbandamento perdi quasi un terzo (circa il 29%) dell'efficacia del timone. In più, nell'istante della raffica la forza sulle vele cresce con il <strong>quadrato</strong> della velocità del vento, mentre la spinta dell'acqua sul timone <strong>non aumenta subito</strong>, perché la barca non ha ancora accelerato. Il timone non riesce più a contrastare e la prua parte verso il vento.</p>
+
+    <div class="card">
+      <h3>Cosa fare quando arriva la raffica</h3>
+      <ul class="clean">
+        <li><b>Lasca la scotta</b> (<span class="term">sheet out</span>). Apri la randa: scarichi la forza in vela, la barca smette di sbandare, torna piatta e il timone ritrova presa. È la mossa chiave su una deriva.</li>
+        <li><b>Anticipa.</b> Guarda l'acqua: una macchia scura in arrivo è una raffica. Preparati prima che ti raggiunga, non quando ti ha già coricato.</li>
+        <li><b>Tieni la barca piatta col peso.</b> Distenditi fuori bordo il più possibile prima di lascare: timone immerso = controllo.</li>
+        <li><b>Lasca un po' il vang</b> quando hai tanta tela: il boma si alza, la parte alta della vela svergola e scarica, riducendo lo sbandamento.</li>
+      </ul>
+    </div>
+
+    <div class="note"><b>Lo schema che hai visto.</b> "Sheet out" + "Rudder Effectiveness" raccontano proprio questo: appena senti la barca coricarsi sotto raffica, <strong>fila la scotta</strong> per non perdere il timone. È la stessa regola che ogni principiante impara — alla raffica si lasca un filo di scotta e si viene un po' al vento per ridurre lo sbandamento ed evitare la scuffia.</div>
+
+    <div class="card">
+      <h3>Assetto vela per vento forte (Laser)</h3>
+      <ul class="clean">
+        <li><b>Cunningham</b>: cazzato a fondo di bolina (appiattisce e sposta avanti il grasso); puoi allascarlo un po' in poppa.</li>
+        <li><b>Tesabase</b>: non tirarlo troppo — ti serve un po' di potenza in basso, lascia profonda la parte bassa della vela.</li>
+        <li><b>Vang</b>: tanto. Un assetto tipico medio-forte: cazza la scotta finché il bozzello tocca il trasto, blocca molto vang, poi gestisci tutto lasciando e riprendendo la sola scotta per restare piatto.</li>
+        <li><b>Radial / armi piccoli</b>: serve meno vang e meno cunningham rispetto allo Standard.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SCUFFIA -->
+  <section id="scuffia">
+    <p class="sec-eyebrow"><b>06</b> Quando finisci in acqua</p>
+    <h2 class="sec">Scuffia e recupero</h2>
+    <p class="intro">Scuffiare fa parte del gioco: se non lo fai mai, probabilmente non stai spingendo. L'importante è recuperare in fretta e in sicurezza. Su una barca con una sola persona si raddrizza salendo sulla <strong>deriva</strong> e usando il peso del corpo come leva.</p>
+
+    <div class="note warn"><b>Due regole di sicurezza prima di tutto.</b> Non restare mai sotto lo scafo (sotto la barca rovesciata c'è pochissima aria) e non separarti mai dalla barca: è il tuo galleggiante più grande.</div>
+
+    <div class="card">
+      <h3>Raddrizzare la barca (un solo velista)</h3>
+      <ol class="steps">
+        <li><b>Lasciati cadere dal lato alto</b><span>Quando la scuffia è inevitabile non aggrapparti per restare a bordo: cadi in acqua e, se puoi, afferra la falchetta dal lato alto mentre la vela tocca l'acqua, così non ti separi.</span></li>
+        <li><b>Libera la scotta</b><span>Assicurati che la scotta della randa sia fuori dal blocco e il boma possa ruotare libero. La vela deve restare distesa sottovento: se finisce sopravvento la barca si rialza e riscuffia subito.</span></li>
+        <li><b>Prua circa al vento</b><span>Orienta lo scafo con la prua verso il vento (boma verso poppa): quando si rialza la vela fileggia invece di riempirsi e ricoricarti.</span></li>
+        <li><b>Sali sulla deriva</b><span>Raggiungi la deriva, controlla che sia completamente abbassata, e salici sopra tenendoti alla falchetta. Tieni i piedi vicino alla base, dove la deriva entra nello scafo. Non saltare sulla punta: si può rompere.</span></li>
+        <li><b>Fai leva col peso</b><span>Inclina indietro il corpo tirando sulla falchetta: la barca si raddrizza gradualmente.</span></li>
+        <li><b>Risali subito</b><span>Mentre lo scafo torna piatto, entra dal fianco restando basso nel pozzetto (oppure dallo specchio di poppa). Recupera barra e scotta e riparti.</span></li>
+      </ol>
+    </div>
+
+    <div class="note sea"><b>Se la barca è "a campana" (rovesciata del tutto).</b> Tieni la scotta libera, assicurati che la deriva sia tutta fuori e verticale, sali sulla falchetta sopravvento, afferra la punta della deriva e sporgi il peso indietro: lo scafo torna sul fianco e poi prosegui come sopra.</div>
+    <p class="src">Con vento da leggero a medio, con un po' di pratica, molte scuffie si "raddrizzano all'asciutto": la vela si appoggia piano sull'acqua e passi direttamente sulla deriva senza finire in acqua.</p>
+  </section>
+
+  <!-- GLOSSARIO -->
+  <section id="glossario">
+    <p class="sec-eyebrow"><b>07</b> Italiano ↔ inglese</p>
+    <h2 class="sec">Glossario</h2>
+    <p class="intro">I manuali di riferimento (RYA, ILCA) sono in inglese: ecco i termini che incontri più spesso.</p>
+    <div class="gloss">
+      <dl><dt>Orzare <span>head up</span></dt><dd>Avvicinare la prua al vento.</dd></dl>
+      <dl><dt>Poggiare <span>bear away</span></dt><dd>Allontanare la prua dal vento.</dd></dl>
+      <dl><dt>Cazzare <span>sheet in</span></dt><dd>Tirare la scotta, chiudere la vela.</dd></dl>
+      <dl><dt>Lascare <span>ease / sheet out</span></dt><dd>Filare la scotta, aprire la vela.</dd></dl>
+      <dl><dt>Scotta <span>mainsheet</span></dt><dd>La cima che regola l'apertura della randa.</dd></dl>
+      <dl><dt>Vang <span>kicker / vang</span></dt><dd>Tira giù il boma, controlla lo svergolamento.</dd></dl>
+      <dl><dt>Randa <span>mainsail</span></dt><dd>La vela del Laser.</dd></dl>
+      <dl><dt>Boma <span>boom</span></dt><dd>Il braccio orizzontale alla base della vela.</dd></dl>
+      <dl><dt>Deriva <span>centreboard</span></dt><dd>La pinna mobile che contrasta lo scarroccio.</dd></dl>
+      <dl><dt>Timone + barra <span>rudder + tiller</span></dt><dd>Comandi la rotta a poppa.</dd></dl>
+      <dl><dt>Sopravvento <span>windward</span></dt><dd>Il lato da cui arriva il vento.</dd></dl>
+      <dl><dt>Sottovento <span>leeward</span></dt><dd>Il lato opposto al vento.</dd></dl>
+      <dl><dt>Mura <span>tack (lato)</span></dt><dd>Il lato da cui ricevi il vento (dritta o sinistra).</dd></dl>
+      <dl><dt>Virata <span>tack</span></dt><dd>Cambio di mura con la prua nel vento.</dd></dl>
+      <dl><dt>Strambata <span>gybe</span></dt><dd>Cambio di mura con la poppa nel vento.</dd></dl>
+      <dl><dt>Scuffia <span>capsize</span></dt><dd>Quando la barca si corica in acqua.</dd></dl>
+      <dl><dt>Fileggiare <span>luff / flap</span></dt><dd>La vela sbatte senza spingere.</dd></dl>
+      <dl><dt>Sbandamento <span>heel</span></dt><dd>L'inclinazione laterale della barca.</dd></dl>
+      <dl><dt>Bolina <span>close-hauled</span></dt><dd>Andatura controvento.</dd></dl>
+      <dl><dt>Poppa <span>run</span></dt><dd>Vento esattamente da dietro.</dd></dl>
+    </div>
+  </section>
+
+  <!-- FONTI -->
+  <section id="fonti" style="border-bottom:none">
+    <p class="sec-eyebrow"><b>08</b> Da dove vengono questi dati</p>
+    <h2 class="sec">Fonti</h2>
+    <p class="intro">I contenuti sono una sintesi in parole proprie di materiali di scuole e federazioni veliche riconosciute. Per imparare davvero serve l'acqua, non lo schermo.</p>
+    <ul class="src">
+      <li><b>ILCA — International Laser Class Association</b> (ilcasailing.org): guida "Sailing Upwind", Introduction to Laser Sailing, Handbook e regole di classe — bilanciamento, armi, specifiche.</li>
+      <li><b>RYA Laser Handbook</b> (Paul Goodison) e <b>The ILCA Book</b> (Tim Davison & Jon Emmett): i testi standard sulla tecnica del Laser.</li>
+      <li><b>NauticEd Sailing School</b> (scuola certificata US Sailing / NASBLA): articoli su raffiche, straorzata ed efficacia del timone — la fonte dello schema "Sheet out / Rudder Effectiveness".</li>
+      <li><b>Note di vento forte di Glenn Bourke</b> (3 volte campione del mondo Laser), via risorse Yachting New Zealand: assetto cunningham/vang/tesabase e strambata in aria.</li>
+      <li><b>West Coast Sailing</b> e <b>Sail27</b>: dati di scafo, armi e cime di controllo.</li>
+      <li><b>Recupero da scuffia</b>: metodi su deriva (Island Barn SC, Colorado Sail & Yacht Club, Discover Boating / US Sailing).</li>
+      <li><b>Terminologia e andature in italiano</b>: nautica.it, velafriends, nauticando.net.</li>
+    </ul>
+    <div class="note warn"><b>Avviso.</b> Questa app è solo didattica. Impara a vela con un istruttore o una scuola riconosciuta (in Italia la <b>FIV</b>), indossa sempre l'aiuto al galleggiamento, controlla il meteo e non uscire mai oltre il tuo livello e le tue forze.</div>
+
+    <footer>
+      Manuale interattivo · Condurre un Laser / ILCA<br>
+      Sintesi a scopo formativo · non sostituisce un corso certificato
+    </footer>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const C=165,R=128;
+  const rose=document.getElementById('rose');
+  const knob=document.getElementById('knob');
+  const course=document.getElementById('course');
+  const boat=document.getElementById('boat');
+  const rig=document.getElementById('rigGroup');
+  const sail=document.getElementById('sail');
+  const boom=document.getElementById('boom');
+  const rName=document.getElementById('rName');
+  const rDeg=document.getElementById('rDeg');
+  const rMura=document.getElementById('rMura');
+  const rTip=document.getElementById('rTip');
+
+  // build ticks
+  const ticks=document.getElementById('ticks');
+  for(let a=0;a<360;a+=30){
+    const rad=(a-90)*Math.PI/180;
+    const x1=C+(R-9)*Math.cos(rad), y1=C+(R-9)*Math.sin(rad);
+    const x2=C+R*Math.cos(rad), y2=C+R*Math.sin(rad);
+    const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('class','rose-tick');
+    l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+    ticks.appendChild(l);
+  }
+  // no-go wedge (±43° from top)
+  const ng=document.getElementById('noGoPath');
+  const a1=(-43-90)*Math.PI/180, a2=(43-90)*Math.PI/180;
+  ng.setAttribute('d',`M${C} ${C} L${C+R*Math.cos(a1)} ${C+R*Math.sin(a1)} A${R} ${R} 0 0 1 ${C+R*Math.cos(a2)} ${C+R*Math.sin(a2)} Z`);
+
+  // sector labels both sides
+  const lbls=[[45,'45°'],[90,'90°'],[135,'135°'],[180,'180°']];
+  const sg=document.getElementById('sectorLbls');
+  function place(angDeg,txt){
+    const rad=(angDeg-90)*Math.PI/180;
+    const x=C+(R-22)*Math.cos(rad), y=C+(R-22)*Math.sin(rad);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('class','sectorLbl');t.setAttribute('x',x);t.setAttribute('y',y+3);
+    t.setAttribute('text-anchor','middle');t.textContent=txt;sg.appendChild(t);
+  }
+  lbls.forEach(([a,t])=>{place(a,t); if(a!==180)place(-a,t);});
+
+  let tack=1; // 1 = mura a dritta (vento da dritta), -1 = mura a sinistra
+  let phi=45*tack; // heading clockwise from "into wind"
+
+  function boomAngle(theta){return Math.max(8,Math.min(88,(theta-30)*0.62));}
+
+  function info(theta){
+    if(theta<43) return ['Angolo morto','Sei troppo al vento: le vele fileggiano e la barca si ferma. Poggia per riprendere velocità.',true];
+    if(theta<50) return ['Bolina stretta','Randa cazzata quasi a ferro, vang in tensione. Barca piatta e peso fuori bordo: stai risalendo il vento.',false];
+    if(theta<67) return ['Bolina larga','Lasca un filo rispetto alla bolina stretta. Buon compromesso tra velocità e capacità di risalire.',false];
+    if(theta<102) return ['Traverso','Scotta lascata circa a metà. Andatura veloce e stabile: meno sbandamento e meno scarroccio della bolina.',false];
+    if(theta<140) return ['Lasco','Scotta molto lascata, deriva parzialmente sollevata. Con vento fresco attenzione al rollio e alla tendenza a orzare.',false];
+    if(theta<168) return ['Gran lasco','Vela quasi tutta aperta. Spesso conviene fare bordi al gran lasco invece di andare in poppa piena.',false];
+    return ['Poppa · fil di ruota','Randa quasi a 90°, deriva sollevata in buona parte. Andatura instabile: massima attenzione alla strambata involontaria.',false];
+  }
+
+  function update(){
+    if(phi>180)phi=180; if(phi<-180)phi=-180;
+    const theta=Math.abs(phi);
+    const rad=(phi-90+90)*Math.PI/180; // heading: 0 = up
+    // knob & course
+    const kx=C+R*Math.sin(phi*Math.PI/180);
+    const ky=C-R*Math.cos(phi*Math.PI/180);
+    knob.setAttribute('cx',kx);knob.setAttribute('cy',ky);
+    course.setAttribute('x2',kx);course.setAttribute('y2',ky);
+    // boat rotation
+    boat.setAttribute('transform',`rotate(${phi} ${C} ${C})`);
+    // boom side: leeward. mura a dritta(tack=1, phi<0 side) -> boom to local left(-) ; we tie to sign of phi
+    const side = phi>=0?1:-1; // +x local (starboard) for phi>=0
+    const ba=boomAngle(theta)*side;
+    rig.setAttribute('transform',`rotate(${ba} ${C} 150)`);
+    // luffing in no-go
+    const [name,tip,danger]=info(theta);
+    if(danger){sail.setAttribute('class','sailLuff');boom.setAttribute('opacity','.4');}
+    else{sail.setAttribute('class','sailF');boom.setAttribute('opacity','1');}
+    rName.textContent=name;rName.className='r-name'+(danger?' danger':'');
+    rDeg.textContent=Math.round(theta)+'°';
+    rMura.textContent = phi>=0 ? 'mura a sinistra' : 'mura a dritta';
+    rTip.textContent=tip;
+  }
+
+  function setFromPoint(clientX,clientY){
+    const r=rose.getBoundingClientRect();
+    const px=(clientX-r.left)/r.width*330;
+    const py=(clientY-r.top)/r.height*330;
+    const dx=px-C, dy=py-C;
+    phi=Math.atan2(dx,-dy)*180/Math.PI; // 0 up, +right, ±180 down
+    update();
+  }
+
+  let dragging=false;
+  function down(e){dragging=true;rose.setPointerCapture&&rose.setPointerCapture(e.pointerId);move(e);}
+  function move(e){if(!dragging)return;e.preventDefault();const t=e.touches?e.touches[0]:e;setFromPoint(t.clientX,t.clientY);}
+  function up(){dragging=false;}
+  rose.addEventListener('pointerdown',down);
+  rose.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+  // fallback touch
+  rose.addEventListener('touchstart',function(e){dragging=true;move(e);},{passive:false});
+  rose.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('touchend',up);
+
+  // quick buttons
+  document.querySelectorAll('.qbtn[data-ang]').forEach(b=>{
+    b.addEventListener('click',()=>{const a=+b.dataset.ang;phi=a*(phi>=0?1:-1)||a;update();});
+  });
+  document.getElementById('tackBtn').addEventListener('click',()=>{phi=-phi;if(phi===0)phi=-45;update();});
+
+  update();
+
+  // nav active state on scroll
+  const chips=[...document.querySelectorAll('.chip')];
+  const secs=chips.map(c=>document.querySelector(c.getAttribute('href')));
+  const obs=new IntersectionObserver((ents)=>{
+    ents.forEach(en=>{
+      if(en.isIntersecting){
+        const id='#'+en.target.id;
+        chips.forEach(c=>c.classList.toggle('active',c.getAttribute('href')===id));
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px'});
+  secs.forEach(s=>s&&obs.observe(s));
+})();
+</script>
+<script>
+/* Registrazione del service worker — percorso relativo per funzionare sotto la sottocartella di GitHub Pages */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (e) {
+      console.warn('SW non registrato:', e);
+    });
+  });
+}
+</script>
+<script>
+/* ===== Disclaimer + Installazione (Android prompt nativo, iOS istruzioni) ===== */
+(function(){
+  // storage protetto (funziona da sito; ignorato senza errori nell'anteprima)
+  function getS(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function setS(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+  // --- Disclaimer iniziale ---
+  var disc=document.getElementById('disc');
+  var discBtn=document.getElementById('discAccept');
+  function closeDisc(){disc.classList.remove('open');document.body.style.overflow='';setTimeout(function(){if(disc)disc.remove();},250);}
+  if(getS('discOk')==='1'){disc.remove();}
+  else{
+    disc.classList.add('open');document.body.style.overflow='hidden';
+    setTimeout(function(){discBtn.focus();},60);
+    discBtn.addEventListener('click',function(){setS('discOk','1');closeDisc();});
+    disc.addEventListener('keydown',function(e){if(e.key==='Escape'){setS('discOk','1');closeDisc();}});
+  }
+
+  // --- rilevamenti ---
+  function standalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+  function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);}
+
+  var btn=document.getElementById('installBtn');
+  var iosSheet=document.getElementById('iosSheet');
+  var deferred=null;
+
+  function hideBtn(){btn.hidden=true;}
+  function openIos(){iosSheet.classList.add('open');document.body.style.overflow='hidden';}
+  function closeIos(){iosSheet.classList.remove('open');document.body.style.overflow='';}
+
+  document.getElementById('iosClose').addEventListener('click',closeIos);
+  document.getElementById('iosDone').addEventListener('click',function(){setS('iosHide','1');closeIos();hideBtn();});
+
+  // Se l'app è già installata e aperta in standalone: nessun pulsante.
+  if(standalone()){hideBtn();}
+  else if(isIOS()){
+    // iOS non espone un prompt: il pulsante apre le istruzioni.
+    if(getS('iosHide')!=='1'){btn.hidden=false;btn.addEventListener('click',openIos);}
+  }
+  // Android/desktop: gestiti da beforeinstallprompt qui sotto.
+
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();deferred=e;
+    if(standalone())return;
+    btn.hidden=false;
+    btn.addEventListener('click',async function(){
+      if(!deferred)return;
+      deferred.prompt();
+      try{var c=await deferred.userChoice;if(c&&c.outcome==='accepted')hideBtn();}catch(_){}
+      deferred=null;
+    });
+  });
+
+  // Quando l'installazione va a buon fine (Android): il pulsante sparisce.
+  window.addEventListener('appinstalled',function(){hideBtn();deferred=null;});
+  // Se l'utente passa alla modalità app installata mentre la pagina è aperta.
+  window.matchMedia('(display-mode: standalone)').addEventListener&&
+    window.matchMedia('(display-mode: standalone)').addEventListener('change',function(ev){if(ev.matches)hideBtn();});
+})();
+</script>
+</body>
+</html>
